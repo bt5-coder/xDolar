@@ -52,11 +52,14 @@ void Scene3D::onViewWillDisappear()
 
 void Scene3D::onViewDidDisappear()
 {
+    lv_group_t* group = lv_group_get_default();
+    lv_group_remove_all_objs(group);
+    lv_timer_del(timer);
 }
 
 void Scene3D::onViewDidUnload()
 {
-
+    View.Delete();
 }
 
 void Scene3D::AttachEvent(lv_obj_t* obj)
@@ -81,26 +84,22 @@ void Scene3D::onEvent(lv_event_t* event)
 {
     lv_obj_t* obj = lv_event_get_target(event);
     lv_event_code_t code = lv_event_get_code(event);
+    
     auto* instance = (Scene3D*) lv_obj_get_user_data(obj);
 
     Serial.println("Scene3D onEvent tiggered");
 
-    if (code == LV_EVENT_PRESSED)
+    if (obj == instance->View.ui.canvas)
     {
-        Serial.println("Scene3D key tiggered");
-        if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
-		{    
-            instance->Manager->Pop();
-        }
-        //instance->Manager->Push("Pages/Template");
+        if (code == LV_EVENT_PRESSED || code == LV_EVENT_LEAVE)
+        {
+            Serial.println("Scene3D key tiggered");
+            // if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+            {    
+                instance->Manager->Pop();
+            }
 
+        }
     }
     
-    if (obj == instance->root)
-    {
-        if (code == LV_EVENT_LEAVE)
-        {
-            instance->Manager->Pop();
-        }
-    }
 }

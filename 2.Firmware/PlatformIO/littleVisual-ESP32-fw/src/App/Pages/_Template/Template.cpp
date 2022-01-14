@@ -43,7 +43,7 @@ void Template::onViewWillAppear()
 	param.color = lv_color_white();
 	param.time = 100;
 
-	// PAGE_STASH_POP(param);
+	PAGE_STASH_POP(param);
 
 	lv_obj_set_style_bg_color(root, param.color, LV_PART_MAIN);
 
@@ -96,13 +96,16 @@ void Template::onEvent(lv_event_t* event)
 
     Serial.println("Template onEvent tiggered");
 
-	if (code == LV_EVENT_PRESSED)
+	if (obj == instance->View.ui.canvas)
 	{
-		if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+		if (code == LV_EVENT_PRESSED || code == LV_EVENT_LEAVE)
 		{
-			//instance->Manager->Push("Pages/Scene3D");
-			Serial.println("Template Button tiggered");
-			instance->Manager->Push("Pages/SystemInfos");
+			// if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+			{
+				//instance->Manager->Push("Pages/Scene3D");
+				Serial.println("Template Button tiggered");
+				instance->Manager->Push("Pages/SystemInfos");
+			}
 		}
 	}
 }

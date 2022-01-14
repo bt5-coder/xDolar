@@ -15,6 +15,8 @@ SystemInfos::~SystemInfos()
 
 void SystemInfos::onCustomAttrConfig()
 {
+	SetCustomCacheEnable(true);
+	//SetCustomLoadAnimType(PageManager::LOAD_ANIM_OVER_BOTTOM, 500, lv_anim_path_bounce);
 
 }
 
@@ -129,18 +131,31 @@ void SystemInfos::onTimerUpdate(lv_timer_t* timer)
 void SystemInfos::onEvent(lv_event_t* event)
 {
 	auto* instance = (SystemInfos*)lv_event_get_user_data(event);
+	LV_ASSERT_NULL(instance);
 
 	lv_obj_t* obj = lv_event_get_target(event);
 	lv_event_code_t code = lv_event_get_code(event);
 
 	Serial.println("SystemInfos onEvent tigger");
-	if (code == LV_EVENT_PRESSED)
+
+	if (obj == instance->View.ui.joints.icon)
 	{
-		Serial.println("New onEvent Key Press");
-		if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+		if (code == LV_EVENT_PRESSED || code == LV_EVENT_LEAVE)
 		{
-			Serial.println("Template New onEvent tiggered");
-			instance->Manager->Push("Pages/Scene3D");
+			Serial.println("Joints Key Press");
+			if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+			{
+				Serial.println("Template New onEvent tiggered");
+				instance->Manager->Push("Pages/Scene3D");
+			}
+		}
+	}
+	if (obj == instance->View.ui.ble.icon)
+	{
+		if (code == LV_EVENT_PRESSED || code == LV_EVENT_LEAVE)
+		{
+			Serial.println("BLE Key Press");
+			instance->Manager->Pop();
 		}
 	}
 
