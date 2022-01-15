@@ -22,6 +22,7 @@
  */
 #include "PageManager.h"
 #include "PM_Log.h"
+#include <stdlib.h>
 
 #define ABS(x) (((x)>0)?(x):-(x))
 #define CONSTRAIN(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
@@ -39,10 +40,11 @@
 void PageManager::onRootDragEvent(lv_event_t* event)
 {
     lv_obj_t* root = lv_event_get_target(event);
-    PageBase* base = (PageBase*)lv_obj_get_user_data(root);
+    PageBase* base = (PageBase*)lv_event_get_user_data(event);
 
     if (base == nullptr)
     {
+        PM_LOG_ERROR("Page base is NULL");
         return;
     }
 
@@ -52,6 +54,7 @@ void PageManager::onRootDragEvent(lv_event_t* event)
 
     if (!manager->GetCurrentLoadAnimAttr(&animAttr))
     {
+        PM_LOG_ERROR("Can't get current anim attr");
         return;
     }
 
@@ -71,8 +74,8 @@ void PageManager::onRootDragEvent(lv_event_t* event)
     {
         lv_coord_t cur = animAttr.getter(root);
 
-        lv_coord_t max = MAX(animAttr.pop.exit.start, animAttr.pop.exit.end);
-        lv_coord_t min = MIN(animAttr.pop.exit.start, animAttr.pop.exit.end);
+        lv_coord_t max = std::max(animAttr.pop.exit.start, animAttr.pop.exit.end);
+        lv_coord_t min = std::min(animAttr.pop.exit.start, animAttr.pop.exit.end);
 
         lv_point_t offset;
         lv_indev_get_vect(lv_indev_get_act(), &offset);
@@ -155,23 +158,24 @@ void PageManager::onRootAnimFinish(lv_anim_t* a)
   */
 void PageManager::RootEnableDrag(lv_obj_t* root)
 {
+    PageBase* base = (PageBase*)lv_obj_get_user_data(root);
     lv_obj_add_event_cb(
         root,
         onRootDragEvent,
         LV_EVENT_PRESSED,
-        nullptr
+        base
     );
     lv_obj_add_event_cb(
         root,
         onRootDragEvent,
         LV_EVENT_PRESSING,
-        nullptr
+        base
     );
     lv_obj_add_event_cb(
         root,
         onRootDragEvent,
         LV_EVENT_RELEASED,
-        nullptr
+        base
     );
     PM_LOG_INFO("Root drag enabled");
 }
@@ -185,7 +189,7 @@ void PageManager::onRootAsyncLeave(void* data)
 {
     PageBase* base = (PageBase*)data;
     PM_LOG_INFO("Page(%s) send event: LV_EVENT_LEAVE, need to handle...", base->Name);
-    lv_event_send(base->root, LV_EVENT_LEAVE, nullptr);
+    lv_event_send(base->root, LV_EVENT_LEAVE, base);
 }
 
 /**

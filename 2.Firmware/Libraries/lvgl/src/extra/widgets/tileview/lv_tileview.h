@@ -27,12 +27,12 @@ extern "C" {
 typedef struct {
     lv_obj_t obj;
     lv_obj_t * tile_act;
-}lv_tileview_t;
+} lv_tileview_t;
 
 typedef struct {
     lv_obj_t obj;
     lv_dir_t dir;
-}lv_tileview_tile_t;
+} lv_tileview_tile_t;
 
 extern const lv_obj_class_t lv_tileview_class;
 extern const lv_obj_class_t lv_tileview_tile_class;
@@ -42,8 +42,8 @@ extern const lv_obj_class_t lv_tileview_tile_class;
  **********************/
 
 /**
- * Create a tileview objects
- * @param par pointer to an object, it will be the parent of the new tileview
+ * Create a Tileview object
+ * @param parent pointer to an object, it will be the parent of the new tileview
  * @return pointer to the created tileview
  */
 lv_obj_t * lv_tileview_create(lv_obj_t * parent);

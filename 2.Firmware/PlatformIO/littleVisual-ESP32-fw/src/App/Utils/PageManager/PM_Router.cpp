@@ -96,7 +96,7 @@ PageBase* PageManager::Pop()
         top->priv.IsCached = false;
     }
 
-    PM_LOG_INFO("Page(%s) pop << [Screen]  (stash = 0x%p)", top->Name, stash);
+    PM_LOG_INFO("Page(%s) pop << [Screen]", top->Name);
 
     /* Page popup */
     PageStack.pop();
@@ -286,7 +286,7 @@ bool PageManager::SwitchAnimStateCheck()
         PM_LOG_WARN(
             "Page switch busy[AnimState.IsSwitchReq = %d,"
             "AnimState.IsBusy = %d],"
-            "reqire is ignore",
+            "request ignored",
             AnimState.IsSwitchReq,
             AnimState.IsBusy
         );
@@ -365,7 +365,6 @@ void PageManager::SwitchAnimCreate(PageBase* base)
 
     lv_anim_t a;
     AnimDefaultInit(&a);
-
     a.user_data = base;
     lv_anim_set_var(&a, base->root);
     lv_anim_set_ready_cb(&a, onSwitchAnimFinish);

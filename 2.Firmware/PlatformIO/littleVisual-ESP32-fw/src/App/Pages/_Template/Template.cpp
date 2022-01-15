@@ -24,7 +24,7 @@ void Template::onViewLoad()
 	View.Create(root);
 	lv_label_set_text(View.ui.labelTitle, Name);
 
-	AttachEvent(root);
+	//AttachEvent(root);  // can be ignore
 	AttachEvent(View.ui.canvas);
 
 	Model.TickSave = Model.GetData();
@@ -41,7 +41,7 @@ void Template::onViewWillAppear()
 {
 	Param_t param;
 	param.color = lv_color_white();
-	param.time = 100;
+	param.time = 1000;
 
 	PAGE_STASH_POP(param);
 
@@ -67,7 +67,7 @@ void Template::onViewDidDisappear()
 
 void Template::onViewDidUnload()
 {
-
+    View.Delete();
 }
 
 void Template::AttachEvent(lv_obj_t* obj)

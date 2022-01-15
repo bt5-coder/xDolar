@@ -4,9 +4,6 @@ using namespace Page;
 
 void Scene3DView::Create(lv_obj_t* root)
 {
-	ui.group = lv_group_create();
-	lv_indev_set_group(lv_get_indev(LV_INDEV_TYPE_ENCODER), ui.group);
-
 
 	lv_obj_t* bgk = lv_obj_create(root);
 	lv_obj_set_style_bg_opa(bgk, LV_OPA_100, LV_PART_MAIN);
@@ -51,13 +48,20 @@ void Scene3DView::Create(lv_obj_t* root)
 	ui.labelTitle = label;
 	ui.canvas = canvas;
 
+	ui.group = lv_group_create();
+	lv_indev_set_group(lv_get_indev(LV_INDEV_TYPE_ENCODER), ui.group);
+	
+	lv_group_focus_obj(ui.canvas);
+	
 	lv_group_add_obj(ui.group, ui.canvas);
-	//lv_group_focus_obj(ui.canvas);
+
 	lv_group_set_editing(ui.group,false);
+
 }
+
 
 void Scene3DView::Delete()
 {
 	lv_group_del(ui.group);
-	// Style_Reset();
+	//Style_Reset();
 }

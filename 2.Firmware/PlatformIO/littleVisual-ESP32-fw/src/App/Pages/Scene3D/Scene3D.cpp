@@ -19,23 +19,28 @@ void Scene3D::onCustomAttrConfig()
     SetCustomLoadAnimType(PageManager::LOAD_ANIM_OVER_BOTTOM, 500, lv_anim_path_bounce);
 }
 
+
 void Scene3D::onViewLoad()
 {
     Model.Init();
     View.Create(root);
 
-    AttachEvent(root);
+    //AttachEvent(root);
     AttachEvent(View.ui.canvas);
 }
 
 void Scene3D::onViewDidLoad()
 {
-    // lv_obj_set_user_data(View.ui.canvas, this);
-    // lv_obj_add_event_cb(View.ui.canvas, onEvent, LV_EVENT_VALUE_CHANGED, this);
+
 }
 
 void Scene3D::onViewWillAppear()
 {
+    // first time on view load, it will added button control and display
+    // but after push and pop, recover to this page
+    // you need to sync button control to this display
+    lv_indev_set_group(lv_get_indev(LV_INDEV_TYPE_ENCODER), View.ui.group); 
+
     timer = lv_timer_create(onTimerUpdate, 20, this);
     lv_timer_ready(timer);
 }

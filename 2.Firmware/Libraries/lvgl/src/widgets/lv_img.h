@@ -71,7 +71,7 @@ typedef uint8_t lv_img_size_mode_t;
  **********************/
 
 /**
- * Create a image objects
+ * Create an image object
  * @param parent pointer to an object, it will be the parent of the new image
  * @return pointer to the created image
  */
@@ -138,7 +138,7 @@ void lv_img_set_zoom(lv_obj_t * obj, uint16_t zoom);
 
 /**
  * Enable/disable anti-aliasing for the transformations (rotate, zoom) or not.
- * The qualitiy is better with anti-aliasing looks better but slower.
+ * The quality is better with anti-aliasing looks better but slower.
  * @param obj       pointer to an image object
  * @param antialias true: anti-aliased; false: not anti-aliased
  */

@@ -61,6 +61,9 @@ uint32_t lv_snapshot_buf_size_needed(lv_obj_t * obj, lv_img_cf_t cf)
     /*Width and height determine snapshot image size.*/
     lv_coord_t w = lv_obj_get_width(obj);
     lv_coord_t h = lv_obj_get_height(obj);
+    lv_coord_t ext_size = _lv_obj_get_ext_draw_size(obj);
+    w += ext_size * 2;
+    h += ext_size * 2;
 
     uint8_t px_size = lv_img_cf_get_px_size(cf);
     return w * h * ((px_size + 7) >> 3);
@@ -98,10 +101,14 @@ lv_res_t lv_snapshot_take_to_buf(lv_obj_t * obj, lv_img_cf_t cf, lv_img_dsc_t * 
     /*Width and height determine snapshot image size.*/
     lv_coord_t w = lv_obj_get_width(obj);
     lv_coord_t h = lv_obj_get_height(obj);
+    lv_coord_t ext_size = _lv_obj_get_ext_draw_size(obj);
+    w += ext_size * 2;
+    h += ext_size * 2;
 
     /*Backup obj original info.*/
-    lv_disp_t * disp_old = lv_obj_get_disp(obj);
     lv_obj_t * parent_old = lv_obj_get_parent(obj);
+    lv_area_t coords_bkp;
+    lv_area_copy(&coords_bkp, &obj->coords);
 
     lv_memset(buf, 0x00, buff_size);
     lv_memset_00(dsc, sizeof(lv_img_dsc_t));
@@ -116,8 +123,10 @@ lv_res_t lv_snapshot_take_to_buf(lv_obj_t * obj, lv_img_cf_t cf, lv_img_dsc_t * 
 
     lv_disp_drv_init(&driver);
     driver.draw_buf = &draw_buf;
-    driver.hor_res = lv_disp_get_hor_res(disp_old);
-    driver.ver_res = lv_disp_get_ver_res(disp_old);
+
+    /*Make the display big enough to involve the objects on its original places. */
+    driver.hor_res = obj->coords.x1 + w;
+    driver.ver_res = obj->coords.y1 + h;
     lv_disp_drv_use_generic_set_px_cb(&driver, cf);
 
     disp = lv_disp_drv_register(&driver);
@@ -138,6 +147,13 @@ lv_res_t lv_snapshot_take_to_buf(lv_obj_t * obj, lv_img_cf_t cf, lv_img_dsc_t * 
     obj->parent = screen;
 
     disp->inv_p = 0;
+
+    /*Shift obj by ext_size, so there is room for shadow etc.*/
+    obj->coords.x2 += ext_size;
+    obj->coords.x1 += ext_size;
+    obj->coords.y2 += ext_size;
+    obj->coords.y1 += ext_size;
+
     lv_obj_invalidate(obj);
 
     /*Don't call lv_refr_now to avoid animation disruption */
@@ -150,9 +166,11 @@ lv_res_t lv_snapshot_take_to_buf(lv_obj_t * obj, lv_img_cf_t cf, lv_img_dsc_t * 
 
     lv_disp_remove(disp);
 
+    lv_area_copy(&obj->coords, &coords_bkp);
+
     dsc->data = buf;
-    dsc->header.w = w;
-    dsc->header.h = h;
+    dsc->header.w = lv_area_get_width(&draw_buf.area);
+    dsc->header.h = lv_area_get_height(&draw_buf.area);
     dsc->header.cf = cf;
     return LV_RES_OK;
 }
@@ -162,7 +180,7 @@ lv_res_t lv_snapshot_take_to_buf(lv_obj_t * obj, lv_img_cf_t cf, lv_img_dsc_t * 
  * @param obj    The object to generate snapshot.
  * @param cf     color format for generated image.
  *
- * @return a pointer to a image descriptor, or NULL if failed.
+ * @return a pointer to an image descriptor, or NULL if failed.
  */
 lv_img_dsc_t * lv_snapshot_take(lv_obj_t * obj, lv_img_cf_t cf)
 {

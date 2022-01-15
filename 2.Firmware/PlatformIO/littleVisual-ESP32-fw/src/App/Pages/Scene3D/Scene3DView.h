@@ -9,6 +9,7 @@ namespace Page
     {
     public:
         void Create(lv_obj_t* root);
+        // void Style_Reset();
         void Delete();
     public:
         struct

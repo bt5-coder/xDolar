@@ -52,9 +52,9 @@ static lv_obj_t * indev_obj_act = NULL;
  *      MACROS
  **********************/
 #if LV_LOG_TRACE_INDEV
-#  define INDEV_TRACE(...) LV_LOG_TRACE( __VA_ARGS__)
+    #define INDEV_TRACE(...) LV_LOG_TRACE(__VA_ARGS__)
 #else
-#  define INDEV_TRACE(...)
+    #define INDEV_TRACE(...)
 #endif
 
 /**********************
@@ -143,29 +143,32 @@ void lv_indev_reset(lv_indev_t * indev, lv_obj_t * obj)
     if(indev) {
         indev->proc.reset_query = 1;
         if(indev_act == indev) indev_obj_act = NULL;
-        if(obj == NULL || indev->proc.types.pointer.last_pressed == obj) {
-            indev->proc.types.pointer.last_pressed = NULL;
-        }
-        if(obj == NULL || indev->proc.types.pointer.act_obj == obj) {
-            indev->proc.types.pointer.act_obj = NULL;
-        }
-        if(obj == NULL || indev->proc.types.pointer.last_obj == obj) {
-            indev->proc.types.pointer.last_obj = NULL;
+        if(indev->driver->type == LV_INDEV_TYPE_POINTER || indev->driver->type == LV_INDEV_TYPE_KEYPAD) {
+            if(obj == NULL || indev->proc.types.pointer.last_pressed == obj) {
+                indev->proc.types.pointer.last_pressed = NULL;
+            }
+            if(obj == NULL || indev->proc.types.pointer.act_obj == obj) {
+                indev->proc.types.pointer.act_obj = NULL;
+            }
+            if(obj == NULL || indev->proc.types.pointer.last_obj == obj) {
+                indev->proc.types.pointer.last_obj = NULL;
+            }
         }
     }
     else {
         lv_indev_t * i = lv_indev_get_next(NULL);
         while(i) {
             i->proc.reset_query = 1;
-            if((i->driver->type == LV_INDEV_TYPE_POINTER || i->driver->type == LV_INDEV_TYPE_KEYPAD) &&
-               (obj == NULL || i->proc.types.pointer.last_pressed == obj)) {
-                i->proc.types.pointer.last_pressed = NULL;
-            }
-            if(obj == NULL || i->proc.types.pointer.act_obj == obj) {
-                i->proc.types.pointer.act_obj = NULL;
-            }
-            if(obj == NULL || i->proc.types.pointer.last_obj == obj) {
-                i->proc.types.pointer.last_obj = NULL;
+            if(i->driver->type == LV_INDEV_TYPE_POINTER || i->driver->type == LV_INDEV_TYPE_KEYPAD) {
+                if(obj == NULL || i->proc.types.pointer.last_pressed == obj) {
+                    i->proc.types.pointer.last_pressed = NULL;
+                }
+                if(obj == NULL || i->proc.types.pointer.act_obj == obj) {
+                    i->proc.types.pointer.act_obj = NULL;
+                }
+                if(obj == NULL || i->proc.types.pointer.last_obj == obj) {
+                    i->proc.types.pointer.last_obj = NULL;
+                }
             }
             i = lv_indev_get_next(i);
         }
@@ -290,8 +293,9 @@ lv_obj_t * lv_indev_search_obj(lv_obj_t * obj, lv_point_t * point)
     /*If the point is on this object check its children too*/
     if(lv_obj_hit_test(obj, point)) {
         int32_t i;
-        for(i = lv_obj_get_child_cnt(obj) - 1; i >= 0; i--) {
-            lv_obj_t * child = lv_obj_get_child(obj, i);
+        uint32_t child_cnt = lv_obj_get_child_cnt(obj);
+        for(i = child_cnt - 1; i >= 0; i--) {
+            lv_obj_t * child = obj->spec_attr->children[i];
             found_p = lv_indev_search_obj(child, point);
 
             /*If a child was found then break*/
@@ -325,7 +329,7 @@ lv_obj_t * lv_indev_search_obj(lv_obj_t * obj, lv_point_t * point)
  */
 static void indev_pointer_proc(lv_indev_t * i, lv_indev_data_t * data)
 {
-    lv_disp_t *disp = i->driver->disp;
+    lv_disp_t * disp = i->driver->disp;
     /*Save the raw points so they can be used again in _lv_indev_read*/
     i->proc.types.pointer.last_raw_point.x = data->point.x;
     i->proc.types.pointer.last_raw_point.y = data->point.y;
@@ -342,9 +346,11 @@ static void indev_pointer_proc(lv_indev_t * i, lv_indev_data_t * data)
 
     /*Simple sanity check*/
     if(data->point.x < 0) LV_LOG_WARN("X is %d which is smaller than zero", data->point.x);
-    if(data->point.x >= lv_disp_get_hor_res(i->driver->disp)) LV_LOG_WARN("X is %d which is greater than hor. res", data->point.x);
+    if(data->point.x >= lv_disp_get_hor_res(i->driver->disp)) LV_LOG_WARN("X is %d which is greater than hor. res",
+                                                                              data->point.x);
     if(data->point.y < 0) LV_LOG_WARN("Y is %d which is smaller than zero", data->point.y);
-    if(data->point.y >= lv_disp_get_ver_res(i->driver->disp)) LV_LOG_WARN("Y is %d which is greater than hor. res", data->point.y);
+    if(data->point.y >= lv_disp_get_ver_res(i->driver->disp)) LV_LOG_WARN("Y is %d which is greater than ver. res",
+                                                                              data->point.y);
 
     /*Move the cursor if set and moved*/
     if(i->cursor != NULL &&
@@ -671,7 +677,8 @@ static void indev_encoder_proc(lv_indev_t * i, lv_indev_data_t * data)
 
 
                     lv_group_send_data(g, LV_KEY_ENTER);
-                } else {
+                }
+                else {
                     lv_obj_clear_state(indev_obj_act, LV_STATE_PRESSED);    /*Remove the pressed state manually*/
                 }
             }
@@ -844,6 +851,11 @@ static void indev_proc_press(_lv_indev_proc_t * proc)
             if(indev_reset_check(proc)) return;
 
             if(indev_act->proc.wait_until_release) return;
+
+            /*Handle focus*/
+            indev_click_focus(&indev_act->proc);
+            if(indev_reset_check(proc)) return;
+
         }
     }
 
@@ -923,11 +935,6 @@ static void indev_proc_release(_lv_indev_proc_t * proc)
 
         /*Send CLICK if no scrolling*/
         if(scroll_obj == NULL) {
-
-            /*Handle focus*/
-            indev_click_focus(&indev_act->proc);
-            if(indev_reset_check(proc)) return;
-
             if(proc->long_pr_sent == 0) {
                 lv_event_send(indev_obj_act, LV_EVENT_SHORT_CLICKED, indev_act);
                 if(indev_reset_check(proc)) return;
@@ -986,66 +993,66 @@ static void indev_proc_reset_query_handler(lv_indev_t * indev)
 static void indev_click_focus(_lv_indev_proc_t * proc)
 {
     /*Handle click focus*/
-    lv_obj_t * obj_to_focus = indev_obj_act;
-    if(lv_obj_has_flag(obj_to_focus, LV_OBJ_FLAG_CLICK_FOCUSABLE) &&
-       proc->types.pointer.last_pressed != obj_to_focus) {
-        lv_group_t * g_act = lv_obj_get_group(obj_to_focus);
-        lv_group_t * g_prev = proc->types.pointer.last_pressed ? lv_obj_get_group(proc->types.pointer.last_pressed) : NULL;
+    if(lv_obj_has_flag(indev_obj_act, LV_OBJ_FLAG_CLICK_FOCUSABLE) == false ||
+       proc->types.pointer.last_pressed == indev_obj_act) {
+        return;
+    }
 
-        /*If both the last and act. obj. are in the same group (or no group but it's also the same)*/
-        if(g_act == g_prev) {
-            /*The objects are in a group*/
-            if(g_act) {
-                lv_group_focus_obj(obj_to_focus);
-                if(indev_reset_check(proc)) return;
-            }
-            /*The object are not in group*/
-            else {
-                if(proc->types.pointer.last_pressed) {
-                    lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_DEFOCUSED, indev_act);
-                    if(indev_reset_check(proc)) return;
-                }
+    lv_group_t * g_act = lv_obj_get_group(indev_obj_act);
+    lv_group_t * g_prev = proc->types.pointer.last_pressed ? lv_obj_get_group(proc->types.pointer.last_pressed) : NULL;
 
-                lv_event_send(obj_to_focus, LV_EVENT_FOCUSED, indev_act);
-                if(indev_reset_check(proc)) return;
-            }
+    /*If both the last and act. obj. are in the same group (or have no group)*/
+    if(g_act == g_prev) {
+        /*The objects are in a group*/
+        if(g_act) {
+            lv_group_focus_obj(indev_obj_act);
+            if(indev_reset_check(proc)) return;
         }
-        /*The object are not in the same group (in different group or one in not a group)*/
+        /*The object are not in group*/
         else {
-            /*If the prev. obj. is not in a group then defocus it.*/
-            if(g_prev == NULL && proc->types.pointer.last_pressed) {
+            if(proc->types.pointer.last_pressed) {
                 lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_DEFOCUSED, indev_act);
                 if(indev_reset_check(proc)) return;
             }
-            /*Focus on a non-group object*/
-            else {
-                if(proc->types.pointer.last_pressed) {
-                    /*If the prev. object also wasn't in a group defocus it*/
-                    if(g_prev == NULL) {
-                        lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_DEFOCUSED, indev_act);
-                        if(indev_reset_check(proc)) return;
-                    }
-                    /*If the prev. object also was in a group at least "LEAVE" it instead of defocus*/
-                    else {
-                        lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_LEAVE, indev_act);
-                        if(indev_reset_check(proc)) return;
-                    }
+
+            lv_event_send(indev_obj_act, LV_EVENT_FOCUSED, indev_act);
+            if(indev_reset_check(proc)) return;
+        }
+    }
+    /*The object are not in the same group (in different groups or one has no group)*/
+    else {
+        /*If the prev. obj. is not in a group then defocus it.*/
+        if(g_prev == NULL && proc->types.pointer.last_pressed) {
+            lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_DEFOCUSED, indev_act);
+            if(indev_reset_check(proc)) return;
+        }
+        /*Focus on a non-group object*/
+        else {
+            if(proc->types.pointer.last_pressed) {
+                /*If the prev. object also wasn't in a group defocus it*/
+                if(g_prev == NULL) {
+                    lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_DEFOCUSED, indev_act);
+                    if(indev_reset_check(proc)) return;
+                }
+                /*If the prev. object also was in a group at least "LEAVE" it instead of defocus*/
+                else {
+                    lv_event_send(proc->types.pointer.last_pressed, LV_EVENT_LEAVE, indev_act);
+                    if(indev_reset_check(proc)) return;
                 }
             }
-
-            /*Focus to the act. in its group*/
-            if(g_act) {
-                lv_group_focus_obj(obj_to_focus);
-                if(indev_reset_check(proc)) return;
-            }
-            else {
-                lv_event_send(obj_to_focus, LV_EVENT_FOCUSED, indev_act);
-                if(indev_reset_check(proc)) return;
-            }
         }
-        proc->types.pointer.last_pressed = obj_to_focus;
-    }
 
+        /*Focus to the act. in its group*/
+        if(g_act) {
+            lv_group_focus_obj(indev_obj_act);
+            if(indev_reset_check(proc)) return;
+        }
+        else {
+            lv_event_send(indev_obj_act, LV_EVENT_FOCUSED, indev_act);
+            if(indev_reset_check(proc)) return;
+        }
+    }
+    proc->types.pointer.last_pressed = indev_obj_act;
 }
 
 /**
