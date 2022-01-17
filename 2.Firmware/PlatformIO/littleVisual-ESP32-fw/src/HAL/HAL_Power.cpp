@@ -1,4 +1,5 @@
 #include "HAL/HAL.h"
+#include "Wire.h"
 
 /*上一次操作时间(ms)*/
 static uint32_t Power_LastHandleTime = 0;
@@ -19,11 +20,62 @@ static HAL::Power_CallbackFunction_t Power_EventCallback = NULL;
 #define BATT_MAX_VOLTAGE    3900
 #define BATT_MIN_VOLTAGE    3300
 
+#define CHARGER_ADDR 0x75
+#define CHARGING_Status 0x70
+#define Battery_Status 0x71
 
 static void Power_ADC_Init()
 {
     pinMode(CONFIG_BAT_DET_PIN, INPUT);
     pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT_PULLUP);
+}
+
+//IP5307 Status Check
+static bool Charger_Status_Check(uint8_t addr)
+{
+    Wire.begin(CONFIG_MCU_SDA_PIN,CONFIG_MCU_SCL_PIN);
+
+    uint8_t data = 0;                              // `data` will store the register data
+    Wire.beginTransmission(CHARGER_ADDR);           // Initialize the Tx buffer
+
+    if (addr == CHARGING_Status)
+    {
+        Wire.write(CHARGING_Status);                   // Put slave register address in Tx buffer
+        Wire.endTransmission(false);                // Send the Tx buffer, but send a restart to keep connection alive
+        Wire.requestFrom(CHARGER_ADDR, (size_t)1);       // Read one byte from slave register address
+        if (Wire.available()) data = Wire.read();   // Fill Rx buffer with result
+        
+        Serial.print("I2C: Reg 0x70 is 0x");
+        Serial.print(data, HEX);
+        Serial.println(" !");
+
+        if ( (data && 0x08) == 1)
+            return true;    // charging
+        else 
+            return false;   // un-charging
+    }
+
+    else if (addr == Battery_Status)
+    {
+        Wire.write(Battery_Status);                   // Put slave register address in Tx buffer
+        Wire.endTransmission(false);                  // Send the Tx buffer, but send a restart to keep connection alive
+        Wire.requestFrom(CHARGER_ADDR, (size_t)1);  // Read one byte from slave register address
+        if (Wire.available()) data = Wire.read();     // Fill Rx buffer with result
+
+        Serial.print("I2C: Reg 0x71 is 0x");
+        Serial.print(data, HEX);
+        Serial.println(" !");
+
+        if ( (data && 0x08) == 1)
+            return true;   // battery full
+        else 
+            return false;   // battery un-full
+    }
+
+    else 
+    {
+        return 0;
+    }
 }
 
 /**
@@ -33,24 +85,17 @@ static void Power_ADC_Init()
   */
 void HAL::Power_Init()
 {
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT);
 
-    /*电源使能保持*/
-    Serial.println("Power: Waiting...");
-    pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
-    digitalWrite(CONFIG_POWER_EN_PIN, LOW);
+    Serial.println("Power On ...");
+
     // Try to connect to BLE device while waiting for boot
     uint64_t time = millis();
-    while (millis() - time < 1000)
+    //while (millis() - time < 1000)
     {
-        HAL::BT_Update();
-        delay(100);
+    //    HAL::BT_Update();
+    //    delay(100);
     }
-    digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
-    Serial.println("Power: ON");
 
-    /*电池检测*/
-    Power_ADC_Init();
     Power_SetAutoLowPowerTimeout(60);
     Power_HandleTimeUpdate();
     Power_SetAutoLowPowerEnable(false);
@@ -121,7 +166,7 @@ void HAL::Power_Shutdown()
   */
 void HAL::Power_Update()
 {
-    __IntervalExecute(Power_ADC_TrigUpdate(), 1000);
+    // __IntervalExecute(Power_ADC_TrigUpdate(), 1000);
 
     if (!Power_AutoLowPowerEnable)
         return;
@@ -135,6 +180,10 @@ void HAL::Power_Update()
     }
 }
 
+// Pay Attention to this
+// M5 Stack don't have ADC to detect battery power
+// M5 have a charger with IIC interface to communicate
+// Charger IIC address is 0x75
 void HAL::Power_GetInfo(Power_Info_t* info)
 {
     uint32_t sum = Power_ADCValue;
@@ -161,7 +210,14 @@ void HAL::Power_GetInfo(Power_Info_t* info)
         0, 100
     );
 
-    info->usage = usage;
-    info->isCharging = usage != 100 && !digitalRead(CONFIG_BAT_CHG_DET_PIN);
+    bool battery_usage = Charger_Status_Check(Battery_Status);
+    bool isCharging = Charger_Status_Check(CHARGING_Status);
+    
+    if (battery_usage)
+        info->usage = 100;
+    else 
+        info->usage = usage;
+   
+    info->isCharging = isCharging;
     info->voltage = voltage;
 }

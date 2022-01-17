@@ -8,7 +8,7 @@ void HAL::I2C_Init(bool startScan)
     if(!startScan)
         return;
 
-    uint8_t error, address;
+    uint8_t error, address, data;
     int nDevices;
 
     Serial.println("I2C: device scanning...");
@@ -30,6 +30,21 @@ void HAL::I2C_Init(bool startScan)
             Serial.print(address, HEX);
             Serial.println(" !");
 
+            // data = read_byte(address,0x70);
+            uint8_t data = 0;                         // `data` will store the register data
+            Wire.beginTransmission(address);         // Initialize the Tx buffer
+            Wire.write(0x70);                       // Put slave register address in Tx buffer
+            Wire.endTransmission(false);  // Send the Tx buffer, but send a restart to keep connection alive
+
+            Wire.requestFrom(address, (size_t)1);       // Read one byte from slave register address
+            if (Wire.available()) data = Wire.read();  // Fill Rx buffer with result
+
+            Serial.println("I2C: Device 0x75 register dump");
+            if (address < 16)
+                Serial.print("0");
+            Serial.print(data, HEX);
+            Serial.println(" !");
+            
             nDevices++;
         }
         else if (error == 4)

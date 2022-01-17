@@ -24,7 +24,7 @@ void HAL::Init()
     // I think this is because of connection interval is not sync between master and slave
     // Need to dig it out
 
-    //For IP5306 Status Regisitor Read Out 
+    //For IP5306 IIC Status Regisitor Read Out 
     HAL::I2C_Init(true);
 
     HAL::Power_Init();
@@ -39,7 +39,7 @@ void HAL::Init()
 
 void HAL::Update()
 {
-    // HAL::Power_Update();
+    HAL::Power_Update();
     HAL::Encoder_Update();
     HAL::Audio_Update();
     HAL::BT_Update();
