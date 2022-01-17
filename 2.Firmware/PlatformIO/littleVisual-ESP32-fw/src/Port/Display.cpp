@@ -38,20 +38,20 @@ void TaskLvglUpdate(void* parameter)
 
 
 /**
-  * @brief  显示初始化
-  * @param  无
-  * @retval 无
+  * @brief  ????????
+  * @param  ??
+  * @retval ??
   */
 void Port_Init()
 {
     static SCREEN_CLASS screen;
 
-    /* 屏幕初始化 */
+    /* ???????? */
     screen.begin();
     screen.setRotation(0);
     screen.fillScreen(TFT_BLACK);
 
-    /* lvgl初始化 */
+    /* lvgl????? */
     lv_init();
     lv_port_disp_init(&screen);
     lv_port_indev_init();
@@ -66,6 +66,6 @@ void Port_Init()
         configMAX_PRIORITIES - 1,
         &handleTaskLvgl);
 
-    /* 背光渐亮 */
+    /* ?????? */
     HAL::Backlight_SetGradual(500, 1000);
 }

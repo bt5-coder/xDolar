@@ -34,11 +34,15 @@ void Template::onViewDidLoad()
 {
     //lv_obj_set_user_data(View.ui.canvas, this);
     //lv_obj_add_event_cb(View.ui.canvas, onEvent, LV_EVENT_VALUE_CHANGED, this);
-
 }
 
 void Template::onViewWillAppear()
 {
+	// first time on view load, it will added button control and display
+    // but after push and pop, recover to this page
+    // you need to sync button control to this display
+    lv_indev_set_group(lv_get_indev(LV_INDEV_TYPE_ENCODER), View.ui.group); 
+
 	Param_t param;
 	param.color = lv_color_white();
 	param.time = 1000;

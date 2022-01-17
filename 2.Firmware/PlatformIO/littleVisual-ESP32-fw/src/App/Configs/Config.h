@@ -51,8 +51,8 @@
 #define CONFIG_SCREEN_BUFFER_SIZE   (CONFIG_SCREEN_HOR_RES * CONFIG_SCREEN_VER_RES /2)
 
 /* Battery */
-#define CONFIG_BAT_DET_PIN          37
-#define CONFIG_BAT_CHG_DET_PIN      38
+#define CONFIG_BAT_DET_PIN          -1
+#define CONFIG_BAT_CHG_DET_PIN      -1
 
 /* Buzzer */
 #define CONFIG_BUZZ_PIN             25
@@ -78,7 +78,7 @@
 #define CONFIG_BUTTON_B        38
 
 /* Power */
-#define CONFIG_POWER_EN_PIN         21
+#define CONFIG_POWER_EN_PIN         -1
 
 /* Debug USART */
 #define CONFIG_DEBUG_SERIAL         Serial
@@ -86,8 +86,8 @@
 /* SD CARD */
 #define CONFIG_SD_SPI               SPI_SD
 #define CONFIG_SD_CD_PIN            -1
-#define CONFIG_SD_MOSI_PIN          19
-#define CONFIG_SD_MISO_PIN          23
+#define CONFIG_SD_MOSI_PIN          23
+#define CONFIG_SD_MISO_PIN          19
 #define CONFIG_SD_SCK_PIN           18
 #define CONFIG_SD_CS_PIN            4
 #define CONFIG_SD_DET_PIN           -1

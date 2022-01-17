@@ -8,7 +8,7 @@ extern lv_color_t* lv_disp_buf_p;
 
 void HAL::Init()
 {
-      // Serial.begin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert)
+    // Serial.begin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert)
     Serial.begin(115200, SERIAL_8N1, 16, 17);  //Init serial port 0 for M5Stack
     Serial.println(VERSION_FIRMWARE_NAME);
     Serial.println("Version: " VERSION_SOFTWARE);
@@ -21,15 +21,18 @@ void HAL::Init()
 
     HAL::BT_Init(); 
     // ToDo: some of the process below will interrupt BLE connection, find it out
-    // HAL::Power_Init();
+    // I think this is because of connection interval is not sync between master and slave
+    // Need to dig it out
+
+    //For IP5306 Status Regisitor Read Out 
+    HAL::I2C_Init(true);
+
+    HAL::Power_Init();
     HAL::Backlight_Init();
     HAL::Encoder_Init();
-    //HAL::Button_Init();
-    //HAL::Buzz_init();
-    //HAL::Audio_Init();
-    // HAL::SD_Init();
-    HAL::I2C_Init(true);
-    // HAL::IMU_Init();
+    HAL::Buzz_init();
+    HAL::Audio_Init();
+    HAL::SD_Init();
 
     HAL::Audio_PlayMusic("Startup");
 }
@@ -38,9 +41,7 @@ void HAL::Update()
 {
     // HAL::Power_Update();
     HAL::Encoder_Update();
-    // HAL::Button_Update();
-    // HAL::Audio_Update();
-    // HAL::IMU_Update();
+    HAL::Audio_Update();
     HAL::BT_Update();
-    // __IntervalExecute(HAL::SD_Update(), 500);
+    __IntervalExecute(HAL::SD_Update(), 500);
 }
