@@ -49,6 +49,7 @@ namespace HAL
     void Power_GetInfo(Power_Info_t* info);
     typedef void(* Power_CallbackFunction_t)(void);
     void Power_SetEventCallback(Power_CallbackFunction_t callback);
+    uint8_t Power_StatusCheck(uint8_t reg);
 
 /* Buzzer */
     void Buzz_init();

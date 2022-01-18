@@ -31,14 +31,14 @@ static void Power_ADC_Init()
 }
 
 //IP5307 Status Check
-static bool Charger_Status_Check(uint8_t addr)
+uint8_t HAL::Power_StatusCheck(uint8_t reg)
 {
     Wire.begin(CONFIG_MCU_SDA_PIN,CONFIG_MCU_SCL_PIN);
 
     uint8_t data = 0;                              // `data` will store the register data
     Wire.beginTransmission(CHARGER_ADDR);           // Initialize the Tx buffer
 
-    if (addr == CHARGING_Status)
+    if (reg == CHARGING_Status)
     {
         Wire.write(CHARGING_Status);                   // Put slave register address in Tx buffer
         Wire.endTransmission(false);                // Send the Tx buffer, but send a restart to keep connection alive
@@ -49,27 +49,27 @@ static bool Charger_Status_Check(uint8_t addr)
         Serial.print(data, HEX);
         Serial.println(" !");
 
-        if ( (data && 0x08) == 1)
-            return true;    // charging
+        if (data & 0x08) 
+            return 1;    // charging
         else 
-            return false;   // un-charging
+            return 0;   // un-charging
     }
 
-    else if (addr == Battery_Status)
+    else if (reg == Battery_Status)
     {
         Wire.write(Battery_Status);                   // Put slave register address in Tx buffer
         Wire.endTransmission(false);                  // Send the Tx buffer, but send a restart to keep connection alive
-        Wire.requestFrom(CHARGER_ADDR, (size_t)1);  // Read one byte from slave register address
+        Wire.requestFrom(CHARGER_ADDR, (size_t)1);    // Read one byte from slave register address
         if (Wire.available()) data = Wire.read();     // Fill Rx buffer with result
 
         Serial.print("I2C: Reg 0x71 is 0x");
         Serial.print(data, HEX);
         Serial.println(" !");
 
-        if ( (data && 0x08) == 1)
-            return true;   // battery full
+        if (data & 0x08) 
+            return 1;   // battery full
         else 
-            return false;   // battery un-full
+            return 0;   // battery un-full
     }
 
     else 
@@ -210,11 +210,19 @@ void HAL::Power_GetInfo(Power_Info_t* info)
         0, 100
     );
 
-    bool battery_usage = Charger_Status_Check(Battery_Status);
-    bool isCharging = Charger_Status_Check(CHARGING_Status);
+    bool battery_usage = Power_StatusCheck(Battery_Status);
+    bool isCharging = Power_StatusCheck(CHARGING_Status);
     
+    Serial.print("battery_usage");
+    Serial.print(battery_usage);
+    Serial.print("isCharging");
+    Serial.print(isCharging);
+
     if (battery_usage)
+    {
+        Serial.print("I2C: Reg 0x71 is 0x");
         info->usage = 100;
+    }
     else 
         info->usage = usage;
    
