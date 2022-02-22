@@ -61,7 +61,7 @@ void Port_Init()
     xTaskCreate(
         TaskLvglUpdate,
         "LvglThread",
-        20000,
+        10000,
         nullptr,
         configMAX_PRIORITIES - 1,
         &handleTaskLvgl);
