@@ -49,7 +49,7 @@ void App_Init()
     
     manager.Push("Pages/Startup");
 
-    //ACCOUNT_SEND_NOTIFY_CMD(Storage, STORAGE_CMD_LOAD);
+    ACCOUNT_SEND_NOTIFY_CMD(Storage, STORAGE_CMD_LOAD);
     //ACCOUNT_SEND_NOTIFY_CMD(SysConfig, SYSCONFIG_CMD_LOAD);
 
     INIT_DONE();
