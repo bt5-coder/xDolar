@@ -22,15 +22,17 @@ void SystemInfos::onCustomAttrConfig()
 
 void SystemInfos::onViewLoad()
 {
+	
 	Model.Init();
 	View.Create(root);
-	// AttachEvent(root);
+	//	Sub Page
+	//	AttachEvent(root);
 	AttachEvent(View.ui.joints.icon);
-	//AttachEvent(View.ui.pose6d.icon);
-	//AttachEvent(View.ui.system.icon);
+	//	AttachEvent(View.ui.pose6d.icon);
+	//	AttachEvent(View.ui.system.icon);
 	AttachEvent(View.ui.ble.icon);
-	//AttachEvent(View.ui.battery.icon);
-	//AttachEvent(View.ui.storage.icon);
+	//	AttachEvent(View.ui.battery.icon);
+	//	AttachEvent(View.ui.storage.icon);
 
 }
 

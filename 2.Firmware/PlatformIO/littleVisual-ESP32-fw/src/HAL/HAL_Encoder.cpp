@@ -86,7 +86,6 @@ void HAL::Encoder_Init()
 void HAL::Encoder_Update()
 {
     EncoderPush.EventMonitor(Encoder_GetIsPush());
-
 }
 
 int16_t HAL::Encoder_GetDiff()

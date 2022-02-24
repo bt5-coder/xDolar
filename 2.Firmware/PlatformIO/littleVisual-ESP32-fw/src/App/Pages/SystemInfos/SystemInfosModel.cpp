@@ -10,6 +10,8 @@ void SystemInfosModel::Init()
     account->Subscribe("BLE");
     account->Subscribe("Power");
     account->Subscribe("Storage");
+
+    account->Subscribe("Encoder");
 }
 
 void SystemInfosModel::Deinit()
