@@ -12,11 +12,11 @@ void Accounts_Init();
 namespace AccountSystem
 {
 
-AccountBroker* Broker();
+    AccountBroker* Broker();
 
-void IMU_Commit(HAL::IMU_Info_t* info);
+    void IMU_Commit(HAL::IMU_Info_t* info);
 
-void BLE_Commit(HAL::BLE_Info_t* info);
+    void BLE_Commit(HAL::BLE_Info_t* info);
 }
 
 #endif

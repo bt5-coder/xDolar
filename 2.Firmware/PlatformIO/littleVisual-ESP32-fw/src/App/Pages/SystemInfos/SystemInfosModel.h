@@ -24,7 +24,7 @@ public:
 
     void GetStorageInfo(
         bool* detect,
-        char* size, uint32_t len
+        float* totalsize, float* unusedsize
     );
 
     void GetJointsInfo(

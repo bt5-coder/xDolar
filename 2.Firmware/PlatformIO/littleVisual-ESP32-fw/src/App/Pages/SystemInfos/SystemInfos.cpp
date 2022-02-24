@@ -107,10 +107,12 @@ void SystemInfos::Update()
 
 	/* Storage */
 	bool detect;
-	Model.GetStorageInfo(&detect, buf, sizeof(buf));
+	float storagesize,unusedsize;
+	Model.GetStorageInfo(&detect, &storagesize, &unusedsize);
 	View.SetStorage(
 		detect ? "YES" : "NO",
-		buf,
+		storagesize,
+		unusedsize,
 		VERSION_FILESYSTEM
 	);
 

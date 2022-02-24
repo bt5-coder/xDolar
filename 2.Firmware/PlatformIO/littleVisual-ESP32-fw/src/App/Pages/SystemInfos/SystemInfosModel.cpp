@@ -59,17 +59,24 @@ void SystemInfosModel::GetBatteryInfo(
 
 void SystemInfosModel::GetStorageInfo(
     bool* detect,
-    char* usage, uint32_t len
+    float* totalsize, float* unusedsize
 )
 {
     AccountSystem::Storage_Basic_Info_t info;
     account->Pull("Storage", &info, sizeof(info));
     *detect = info.isDetect;
+    *unusedsize = info.freeSizeMB;
+    //*totalsize = info.totalSizeMB /1024.0f;
+    *totalsize = info.totalSizeMB;
+
+    /*
     snprintf(
         usage, len,
         "%0.1f GB",
         info.totalSizeMB / 1024.0f
     );
+    */
+
 }
 
 void Page::SystemInfosModel::GetJointsInfo(char* data, uint32_t len)

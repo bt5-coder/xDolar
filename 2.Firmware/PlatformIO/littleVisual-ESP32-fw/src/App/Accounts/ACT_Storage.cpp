@@ -117,7 +117,8 @@ static int onEvent(Account* account, Account::EventParam_t* param)
         Storage_Basic_Info_t* info = (Storage_Basic_Info_t*) param->data_p;
         info->isDetect = HAL::SD_GetReady();
         info->totalSizeMB = HAL::SD_GetCardSizeMB();
-        info->freeSizeMB = 0.0f;
+        //info->freeSizeMB = 0.0f;
+        info->freeSizeMB = HAL::SD_GetFreeSizeMB();
         return 0;
     }
 

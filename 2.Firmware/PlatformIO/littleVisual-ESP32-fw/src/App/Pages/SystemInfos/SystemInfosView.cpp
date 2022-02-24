@@ -104,7 +104,8 @@ void SystemInfosView::Create(lv_obj_t* root)
 		"storage",
 
 		"Detect\n"
-		"Size\n"
+		"Storage\n"
+		"Unused\n"
 		"Version"
 	);
 
@@ -311,17 +312,20 @@ void SystemInfosView::SetBattery(
 
 void SystemInfosView::SetStorage(
 	const char* detect,
-	const char* size,
+	float size,
+	float restsize,
 	const char* version
 )
 {
 	lv_label_set_text_fmt(
 		ui.storage.labelData,
 		"%s\n"
-		"%s\n"
+		"%0.0fMB\n"
+		"%0.0fMB\n"
 		"%s",
 		detect,
 		size,
+		restsize,
 		version
 	);
 }

@@ -32,6 +32,7 @@ namespace HAL
     void SD_Update();
     bool SD_GetReady();
     float SD_GetCardSizeMB();
+    float SD_GetFreeSizeMB();
     typedef void(* SD_CallbackFunction_t)(bool insert);
     void SD_SetEventCallback(SD_CallbackFunction_t callback);
 
